@@ -1,22 +1,31 @@
-// Proven Outreach, Follow-Up, Onboarding & Alumni Retention Templates
-// Supports {{name}}, {{company}}, {{goal}}, {{track}}, {{cohortDate}}, {{payLink}}
+// Proven Outreach, Payment Request, Pre-Flight & Alumni Retention Templates
+// Supports {{name}}, {{fullName}}, {{company}}, {{goal}}, {{track}}, {{amount}}, {{payLink}}, {{bookingUrl}}
 
 window.CRM_TEMPLATES = [
   {
     id: "warm-free-help",
     category: "Warm Lead",
     title: "Turn Free-Help Requests Into Paid Bookings",
-    body: `Hey {{name}} — happy to walk you through setting that up properly! I stopped doing ad-hoc free walkthroughs because I'm running a focused 2-hour live Agentic Launchpad session where we configure Antigravity + Gemini/Claude + GitHub + Vercel/Cloudflare and ship a working multi-file build live.
+    body: `Hey {{name}} — happy to walk you through setting that up properly! I stopped doing ad-hoc free walkthroughs because I'm running a focused 2-hour live Agentic Launchpad sprint where we configure Antigravity + Gemini/Claude + GitHub + Vercel/Cloudflare and ship a working multi-file build live.
 
-Founding cohort seats are £79 / $99 (and include my upcoming Prompt Engineering Masterclass free forever), or we can do a private 1-on-1 sprint tailored to {{goal}} for £199 / $249. Want the signup link?`
+Founding cohort seats are £79 / $99 (and include my upcoming Prompt Engineering Masterclass free forever), or we can do a private 1-on-1 sprint tailored to {{goal}} for £199 / $249. Want to lock your spot?`
+  },
+  {
+    id: "send-pay-link",
+    category: "Closing & Payment",
+    title: "Direct Checkout Link ({{amount}} via PayPal / Revolut / Monzo)",
+    body: `Hey {{name}} — here is the quick payment link to lock your spot in {{track}} ({{amount}}):
+{{payLink}}
+
+Please pop your email in the payment note so I can send your calendar invite and Pre-Flight Checklist immediately. Looking forward to building {{goal}} with you!`
   },
   {
     id: "cold-builder",
     category: "Cold Outreach",
-    title: "Cold Outreach — Founder / Operator / Consultant",
-    body: `Hi {{name}}, saw your work on {{company}} — quick question: are you still copy-pasting out of browser chatbots, or have you moved your workflow onto agentic multi-file builders yet?
+    title: "Cold Outreach — Founder / Consultant / Operator",
+    body: `Hi {{name}}, saw your work at {{company}} — quick question: are you still copy-pasting out of browser chatbots, or have you moved your workflow onto agentic multi-file builders yet?
 
-I'm running a small 2-hour live sprint teaching founders and operators how to command Antigravity + CLI + GitHub + Vercel/Cloudflare to build and deploy real tools fast (no fluff, live build included). Happy to send the 1-page overview or 12-slide deck if useful.`
+I'm running a small 2-hour live sprint teaching founders and operators how to command Antigravity + CLI + GitHub + Vercel/Cloudflare to build and deploy real tools fast (no fluff, live build included). Happy to send the 1-page overview or pitch deck if useful.`
   },
   {
     id: "day2-followup",
@@ -28,19 +37,19 @@ I'm running a small 2-hour live sprint teaching founders and operators how to co
     id: "day5-followup",
     category: "Follow-Up Cadence",
     title: "Day 5 Direct Lock-In / Alternative Track",
-    body: `Hi {{name}}, quick nudge — we have a couple Founding Cohort spots left (£79 / $99, includes the Prompt Engineering Masterclass free). If a group time doesn't fit your schedule, we can also knock out {{goal}} privately in a 1-on-1 build sprint. Let me know which suits better!`
+    body: `Hi {{name}}, quick nudge — we have a couple Founding Cohort spots left (£79 / $99, includes the Prompt Engineering Masterclass free). If the group slot doesn't fit your schedule, we can also knock out {{goal}} privately in a 1-on-1 build sprint. Let me know which suits better!`
   },
   {
     id: "day9-breakup",
     category: "Follow-Up Cadence",
-    title: "Day 9 Clean Break-Up Email (Resurrects Ghosted Leads)",
-    body: `Hey {{name}}, assuming the timing isn't right for Agentic Launchpad this month—totally fine, I'll close your spot note for now so I don't clutter your inbox. If {{goal}} becomes a priority later, just reply anytime and I'll send the next sprint dates.`
+    title: "Day 9 Clean Break-Up (Resurrects Ghosted Leads)",
+    body: `Hey {{name}}, assuming timing isn't right for Agentic Launchpad this month—totally fine, I'll close your spot note for now so I don't clutter your inbox. If {{goal}} becomes a priority later, reply anytime and I'll send the next sprint dates.`
   },
   {
     id: "preflight-student",
     category: "Active Student",
     title: "24h Pre-Flight Checklist (Before Live Class)",
-    body: `Hey {{name}} — excited to build with you! To make sure we start shipping inside the first 10 minutes, please set up these 4 free things before we jump on:
+    body: `Hey {{name}} — excited to build with you! To make sure we start shipping inside the first 10 minutes, please complete these 4 free steps before we jump on:
 1. GitHub account (github.com) + Git installed
 2. Free Vercel (vercel.com) or Cloudflare account linked to GitHub
 3. Antigravity installed + Gemini or Claude access ready

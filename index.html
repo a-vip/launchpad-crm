@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Launchpad CRM — Leads, Cohorts &amp; Alumni</title>
+  <title>Launchpad CRM — Leads, Students &amp; Revenue Engine</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,18 +19,21 @@
         <button class="tab-btn" data-view="pipeline">Pipeline (Kanban)</button>
         <button class="tab-btn" data-view="contacts">All Contacts</button>
         <button class="tab-btn" data-view="students">Students &amp; Alumni</button>
+        <button class="tab-btn" data-view="analytics">Revenue &amp; Cohorts</button>
         <button class="tab-btn" data-view="templates">Templates</button>
       </nav>
       <div class="top-actions">
-        <button class="btn btn-sm" onclick="openImportModal()">Import CSV / Form</button>
-        <button class="btn btn-sm" onclick="openSyncModal()">Cloud Sync &amp; Backup</button>
+        <button class="btn btn-sm" id="privacy-btn" onclick="togglePrivacyMode()">Privacy Blur</button>
+        <button class="btn btn-sm" onclick="openSettingsModal()">Settings</button>
+        <button class="btn btn-sm" onclick="openImportModal()">Import CSV</button>
+        <button class="btn btn-sm" onclick="openSyncModal()">Sync &amp; Backup</button>
         <button class="btn btn-primary btn-sm" onclick="openNewModal()">+ Add Lead</button>
       </div>
     </header>
 
     <main class="main">
       <div id="demo-banner" class="banner-demo" style="display:none;">
-        <span><strong>Demo records loaded:</strong> 5 sample contacts show how Lead Scoring, Deal Rot, and Alumni Checklists work.</span>
+        <span><strong>Demo records loaded:</strong> 5 sample profiles show Lead Scoring, Student Profiles, Deal Rot, and Revenue Analytics. Data stays strictly in your own browser &amp; private Gist (never in this public repo).</span>
         <button class="btn btn-sm btn-danger" onclick="clearDemoData()">Clear Sample Data</button>
       </div>
 
@@ -40,36 +43,38 @@
       <section id="view-pipeline" style="display:none;"></section>
       <section id="view-contacts" style="display:none;"></section>
       <section id="view-students" style="display:none;"></section>
+      <section id="view-analytics" style="display:none;"></section>
       <section id="view-templates" style="display:none;"></section>
     </main>
   </div>
 
-  <!-- Slide-Over Contact Detail Drawer -->
+  <!-- Slide-Over 360 Student / Lead Profile Drawer -->
   <div class="drawer-backdrop" id="drawer-backdrop" onclick="if(event.target===this) closeDrawer()">
     <div class="drawer" id="contact-drawer"></div>
   </div>
 
-  <!-- Add / Edit Lead Modal -->
+  <!-- Add New Lead / Student Modal -->
   <div class="modal-backdrop" id="lead-modal" onclick="if(event.target===this) closeLeadModal()">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h2 id="lead-modal-title">Add New Lead / Contact</h2>
+        <h2>Add New Lead / Student</h2>
         <button class="btn btn-sm" onclick="closeLeadModal()">Close</button>
       </div>
-      <form id="lead-form" onsubmit="saveNewLead(event)" style="display:grid;gap:11px;">
+      <form id="lead-form" onsubmit="saveNewLead(event)" style="display:grid;gap:10px;">
         <div class="row">
           <div class="field"><label>Full Name *</label><input class="input" id="nl-name" required /></div>
           <div class="field"><label>Email</label><input class="input" id="nl-email" type="email" /></div>
         </div>
         <div class="row">
+          <div class="field"><label>Phone / WhatsApp</label><input class="input" id="nl-phone" placeholder="+44..." /></div>
+          <div class="field"><label>Timezone / Location</label><input class="input" id="nl-tz" placeholder="GMT, EST, ICT..." /></div>
+        </div>
+        <div class="row">
           <div class="field"><label>Company / Project</label><input class="input" id="nl-company" /></div>
           <div class="field"><label>Role / Title</label><input class="input" id="nl-role" placeholder="Founder, Consultant..." /></div>
         </div>
-        <div class="row">
-          <div class="field">
-            <label>Stage</label>
-            <select class="input" id="nl-stage"></select>
-          </div>
+        <div class="row-3">
+          <div class="field"><label>Stage</label><select class="input" id="nl-stage"></select></div>
           <div class="field">
             <label>Source</label>
             <select class="input" id="nl-source">
@@ -80,25 +85,61 @@
               <option value="cold-outbound">Cold Outbound</option>
             </select>
           </div>
+          <div class="field">
+            <label>Skill Level</label>
+            <select class="input" id="nl-skill">
+              <option value="non-coder">Non-Coder</option>
+              <option value="light-tech">Light Tech / No-Code</option>
+              <option value="developer">Developer</option>
+            </select>
+          </div>
         </div>
-        <div class="row">
+        <div class="row-3">
           <div class="field">
             <label>Track</label>
             <select class="input" id="nl-track">
-              <option value="cohort">Founding 2h Cohort (£79)</option>
-              <option value="oneOnOne">Private 1-on-1 Sprint (£199)</option>
-              <option value="team">Team / B2B Workshop (£750+)</option>
+              <option value="cohort">Founding 2h Cohort</option>
+              <option value="oneOnOne">Private 1-on-1 Sprint</option>
+              <option value="team">Team / B2B Workshop</option>
             </select>
           </div>
           <div class="field"><label>Deal Value (£)</label><input class="input" id="nl-value" type="number" value="79" /></div>
+          <div class="field"><label>Cohort / Batch</label><input class="input" id="nl-batch" value="Cohort #1" /></div>
         </div>
         <div class="row">
-          <div class="field"><label>Next Follow-Up Date</label><input class="input" id="nl-followup" type="date" /></div>
-          <div class="field"><label>Batch / Cohort Label</label><input class="input" id="nl-batch" value="Cohort #1" /></div>
+          <div class="field"><label>AI Tools They Use</label><input class="input" id="nl-tools" placeholder="ChatGPT, Claude, Antigravity..." /></div>
+          <div class="field"><label>Next Follow-Up</label><input class="input" id="nl-followup" type="date" /></div>
         </div>
         <div class="field"><label>What They Want to Build / Goal</label><textarea class="input" id="nl-goal" rows="2"></textarea></div>
+        <div class="field"><label>Instructor / Coaching Notes</label><textarea class="input" id="nl-notes" rows="2" placeholder="Pain points, background, how to tailor the sprint for them..."></textarea></div>
         <label class="check-item"><input type="checkbox" id="nl-dm" checked /> Decision maker / Budget holder (+20 Lead Score)</label>
-        <button type="submit" class="btn btn-primary">Save Contact</button>
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CRM Settings Modal (Payment Handles & Cohort Caps) -->
+  <div class="modal-backdrop" id="settings-modal" onclick="if(event.target===this) closeSettingsModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>CRM &amp; Payment Link Settings</h2>
+        <button class="btn btn-sm" onclick="closeSettingsModal()">Close</button>
+      </div>
+      <p style="font-size:0.83rem;color:var(--muted);">Configure your handles once so any contact drawer generates instant personalized PayPal, Revolut, or Monzo checkout links.</p>
+      <form onsubmit="saveSettingsForm(event)" style="display:grid;gap:10px;">
+        <div class="row">
+          <div class="field"><label>PayPal.me Handle or URL</label><input class="input" id="set-paypal" placeholder="yourhandle or https://paypal.me/..." /></div>
+          <div class="field"><label>Revolut.me Handle or URL</label><input class="input" id="set-revolut" placeholder="yourtag or https://revolut.me/..." /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Monzo.me Handle or URL</label><input class="input" id="set-monzo" placeholder="yourname or https://monzo.me/..." /></div>
+          <div class="field"><label>Cal.com / Calendly Booking URL</label><input class="input" id="set-booking" placeholder="https://cal.com/..." /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Cohort #1 Seat Cap</label><input class="input" id="set-cap" type="number" min="1" value="10" /></div>
+          <div class="field"><label>Default Cohort Price (£)</label><input class="input" id="set-price" type="number" min="1" value="79" /></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Settings</button>
       </form>
     </div>
   </div>
@@ -107,14 +148,14 @@
   <div class="modal-backdrop" id="import-modal" onclick="if(event.target===this) closeImportModal()">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h2>Import Leads from CSV / Google Forms</h2>
+        <h2>Import Leads / Students (CSV &amp; Google Forms)</h2>
         <button class="btn btn-sm" onclick="closeImportModal()">Close</button>
       </div>
-      <p style="font-size:0.84rem;color:var(--muted);">Upload a CSV exported from Google Forms, LinkedIn, or spreadsheets (columns like <code>Name</code>, <code>Email</code>, <code>Goal</code>, <code>Track</code>, <code>Payment</code> are auto-detected).</p>
+      <p style="font-size:0.83rem;color:var(--muted);">Standard fields (Name, Email, Phone, Goal, Track, Skill, Payment) map automatically—and <strong>every extra form column is preserved</strong> inside each student's profile under Custom Answers so nothing is lost.</p>
       <input type="file" id="csv-file-input" accept=".csv" class="input" />
       <div class="field">
         <label>Or paste CSV text directly:</label>
-        <textarea id="csv-paste" class="input" rows="5" placeholder="Name,Email,Track,Goal&#10;Alex Doe,alex@site.com,cohort,Build SaaS landing page"></textarea>
+        <textarea id="csv-paste" class="input" rows="5" placeholder="Name,Email,Track,Skill,Goal,Extra Question&#10;Alex Doe,alex@site.com,cohort,non-coder,Build micro-site,MacBook Pro"></textarea>
       </div>
       <button class="btn btn-primary" onclick="runCSVImport()">Import Contacts</button>
     </div>
@@ -127,9 +168,9 @@
         <h2>Persistence, Cloud Sync &amp; Backups</h2>
         <button class="btn btn-sm" onclick="closeSyncModal()">Close</button>
       </div>
-      <p style="font-size:0.84rem;color:var(--muted);">Your CRM auto-saves to browser IndexedDB immediately. To sync between your laptop and phone with $0 server costs, connect a <strong>Private GitHub Gist</strong> using a fine-grained token (with Gist read/write permission only).</p>
+      <p style="font-size:0.83rem;color:var(--muted);">Your CRM auto-saves locally in IndexedDB. Even on a public GitHub Pages URL, your leads and notes never enter the public repo. Connect a <strong>Private GitHub Gist</strong> below to sync between your laptop and phone for $0.</p>
       <div class="field">
-        <label>GitHub Token (stored ONLY in this browser's localStorage)</label>
+        <label>GitHub Token (Gist scope only — stored ONLY in this browser)</label>
         <input class="input" id="sync-token" type="password" placeholder="github_pat_..." />
       </div>
       <div class="field">
