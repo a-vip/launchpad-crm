@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launchpad CRM — Leads, Cohorts &amp; Alumni</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>Launchpad CRM</span>
+        <span id="save-status" style="font-size:0.74rem;color:var(--muted);font-weight:500;">Saved locally</span>
+      </div>
+      <nav class="tabs" id="nav-tabs">
+        <button class="tab-btn active" data-view="today">Today's Queue</button>
+        <button class="tab-btn" data-view="pipeline">Pipeline (Kanban)</button>
+        <button class="tab-btn" data-view="contacts">All Contacts</button>
+        <button class="tab-btn" data-view="students">Students &amp; Alumni</button>
+        <button class="tab-btn" data-view="templates">Templates</button>
+      </nav>
+      <div class="top-actions">
+        <button class="btn btn-sm" onclick="openImportModal()">Import CSV / Form</button>
+        <button class="btn btn-sm" onclick="openSyncModal()">Cloud Sync &amp; Backup</button>
+        <button class="btn btn-primary btn-sm" onclick="openNewModal()">+ Add Lead</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div id="demo-banner" class="banner-demo" style="display:none;">
+        <span><strong>Demo records loaded:</strong> 5 sample contacts show how Lead Scoring, Deal Rot, and Alumni Checklists work.</span>
+        <button class="btn btn-sm btn-danger" onclick="clearDemoData()">Clear Sample Data</button>
+      </div>
+
+      <section class="kpi-grid" id="kpi-grid"></section>
+
+      <section id="view-today"></section>
+      <section id="view-pipeline" style="display:none;"></section>
+      <section id="view-contacts" style="display:none;"></section>
+      <section id="view-students" style="display:none;"></section>
+      <section id="view-templates" style="display:none;"></section>
+    </main>
+  </div>
+
+  <!-- Slide-Over Contact Detail Drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop" onclick="if(event.target===this) closeDrawer()">
+    <div class="drawer" id="contact-drawer"></div>
+  </div>
+
+  <!-- Add / Edit Lead Modal -->
+  <div class="modal-backdrop" id="lead-modal" onclick="if(event.target===this) closeLeadModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 id="lead-modal-title">Add New Lead / Contact</h2>
+        <button class="btn btn-sm" onclick="closeLeadModal()">Close</button>
+      </div>
+      <form id="lead-form" onsubmit="saveNewLead(event)" style="display:grid;gap:11px;">
+        <div class="row">
+          <div class="field"><label>Full Name *</label><input class="input" id="nl-name" required /></div>
+          <div class="field"><label>Email</label><input class="input" id="nl-email" type="email" /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Company / Project</label><input class="input" id="nl-company" /></div>
+          <div class="field"><label>Role / Title</label><input class="input" id="nl-role" placeholder="Founder, Consultant..." /></div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Stage</label>
+            <select class="input" id="nl-stage"></select>
+          </div>
+          <div class="field">
+            <label>Source</label>
+            <select class="input" id="nl-source">
+              <option value="free-help-request">Free-Help Asker (Hot)</option>
+              <option value="inbound-form">Signup / Google Form</option>
+              <option value="scorecard">AI Wave Scorecard</option>
+              <option value="warm-network">Warm Network / Referral</option>
+              <option value="cold-outbound">Cold Outbound</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Track</label>
+            <select class="input" id="nl-track">
+              <option value="cohort">Founding 2h Cohort (£79)</option>
+              <option value="oneOnOne">Private 1-on-1 Sprint (£199)</option>
+              <option value="team">Team / B2B Workshop (£750+)</option>
+            </select>
+          </div>
+          <div class="field"><label>Deal Value (£)</label><input class="input" id="nl-value" type="number" value="79" /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Next Follow-Up Date</label><input class="input" id="nl-followup" type="date" /></div>
+          <div class="field"><label>Batch / Cohort Label</label><input class="input" id="nl-batch" value="Cohort #1" /></div>
+        </div>
+        <div class="field"><label>What They Want to Build / Goal</label><textarea class="input" id="nl-goal" rows="2"></textarea></div>
+        <label class="check-item"><input type="checkbox" id="nl-dm" checked /> Decision maker / Budget holder (+20 Lead Score)</label>
+        <button type="submit" class="btn btn-primary">Save Contact</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CSV / Google Form Import Modal -->
+  <div class="modal-backdrop" id="import-modal" onclick="if(event.target===this) closeImportModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>Import Leads from CSV / Google Forms</h2>
+        <button class="btn btn-sm" onclick="closeImportModal()">Close</button>
+      </div>
+      <p style="font-size:0.84rem;color:var(--muted);">Upload a CSV exported from Google Forms, LinkedIn, or spreadsheets (columns like <code>Name</code>, <code>Email</code>, <code>Goal</code>, <code>Track</code>, <code>Payment</code> are auto-detected).</p>
+      <input type="file" id="csv-file-input" accept=".csv" class="input" />
+      <div class="field">
+        <label>Or paste CSV text directly:</label>
+        <textarea id="csv-paste" class="input" rows="5" placeholder="Name,Email,Track,Goal&#10;Alex Doe,alex@site.com,cohort,Build SaaS landing page"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="runCSVImport()">Import Contacts</button>
+    </div>
+  </div>
+
+  <!-- Sync & Backup Modal -->
+  <div class="modal-backdrop" id="sync-modal" onclick="if(event.target===this) closeSyncModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>Persistence, Cloud Sync &amp; Backups</h2>
+        <button class="btn btn-sm" onclick="closeSyncModal()">Close</button>
+      </div>
+      <p style="font-size:0.84rem;color:var(--muted);">Your CRM auto-saves to browser IndexedDB immediately. To sync between your laptop and phone with $0 server costs, connect a <strong>Private GitHub Gist</strong> using a fine-grained token (with Gist read/write permission only).</p>
+      <div class="field">
+        <label>GitHub Token (stored ONLY in this browser's localStorage)</label>
+        <input class="input" id="sync-token" type="password" placeholder="github_pat_..." />
+      </div>
+      <div class="field">
+        <label>Private Gist ID (leave blank on first Push to auto-create)</label>
+        <input class="input" id="sync-gist-id" placeholder="Auto-filled after first Push" />
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="pushGistSync()">Push to Private Gist</button>
+        <button class="btn" onclick="pullGistSync()">Pull from Private Gist</button>
+      </div>
+      <hr style="border-color:var(--border);" />
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" onclick="exportJSON()">Export Full JSON Backup</button>
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+        <label class="btn" style="cursor:pointer;">Restore JSON Backup <input type="file" accept=".json" style="display:none;" onchange="importJSON(event)" /></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="templates.js"></script>
+  <script src="crm-logic.js"></script>
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
